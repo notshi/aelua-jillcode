@@ -29,9 +29,11 @@ import java.io.OutputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.Reader;
+import java.io.FileReader;
 import java.util.Enumeration;
 import java.util.Stack;
 import java.util.Vector;
+
 
 /**
  * <p>
@@ -367,9 +369,20 @@ public final class Lua
    */
   public void call(int nargs, int nresults)
   {
-    apiChecknelems(nargs+1);
-    int func = stackSize - (nargs + 1);
-    this.vmCall(func, nresults);
+	try
+	{
+		apiChecknelems(nargs+1);
+		int func = stackSize - (nargs + 1);
+		this.vmCall(func, nresults);
+	}
+	catch(LuaError ex) // not this 
+	{
+		throw(ex);
+	}
+	catch(Exception ex) // catch other errors
+	{
+		dThrow(-1, ex.toString()+"\n"+ex.getStackTrace()[0].toString() ); // give an easier to debug error
+	}
   }
 
   /**
@@ -559,7 +572,7 @@ public final class Lua
    */
   public LuaTable getMetatable(Object o)
   {
-    LuaTable mt;
+    LuaTable mt=null;
 
     if (o instanceof LuaTable)
     {
@@ -573,7 +586,8 @@ public final class Lua
     }
     else
     {
-      mt = metatable[type(o)];
+		mt = metatable[type(o)];
+		return mt;
     }
     return mt;
   }
@@ -1353,7 +1367,7 @@ protect:
    */
   public boolean toBoolean(Object o)
   {
-    return !(o == NIL || Boolean.FALSE.equals(o));
+    return !(o == NIL || ( (o instanceof Boolean) && (((Boolean)o).booleanValue()==false ) ) );
   }
 
   /**
@@ -1841,7 +1855,7 @@ protect:
    * Likes its PUC-Rio equivalent however, this method leaves a table on
    * the Lua stack.
    */
-  String findTable(LuaTable t, String fname, int szhint)
+  public String findTable(LuaTable t, String fname, int szhint)
   {
     int e = 0;
     int i = 0;
@@ -1913,14 +1927,18 @@ protect:
     {
       throw new NullPointerException();
     }
+/*
+	
     InputStream in = getClass().getResourceAsStream(filename);
     if (in == null)
     {
       return errfile("open", filename, new IOException());
     }
+*/
     int status = 0;
     try
     {
+/*
       in.mark(1);
       int c = in.read();
       if (c == '#')       // Unix exec. file?
@@ -1929,6 +1947,8 @@ protect:
       }
       in.reset();
       status = load(in, "@" + filename);
+*/
+      status = load(new FileReader(filename), "@" + filename);
     }
     catch (IOException e)
     {
@@ -2000,7 +2020,7 @@ protect:
    * module.
    * @return the new table
    */
-  LuaTable register(String name)
+  public LuaTable register(String name)
   {
     findTable(getRegistry(), LOADED, 1);
     Object loaded = value(-1);
@@ -2032,7 +2052,7 @@ protect:
    */
   public String typeNameOfIndex(int idx)
   {
-    return TYPENAME[type(idx)];
+    return typeName(type(idx));
   }
 
   /**
@@ -2229,6 +2249,7 @@ protect:
       ar.setWhat("Java");
     }
     else
+    if (cl instanceof LuaFunction)
     {
       Proto p = ((LuaFunction)cl).proto();
       ar.setSource(p.source());
@@ -2236,6 +2257,13 @@ protect:
       ar.setLastlinedefined(p.lastlinedefined());
       ar.setWhat(ar.linedefined() == 0 ? "main" : "Lua");
     }
+    else
+    {
+      ar.setSource("unknown function");
+      ar.setLinedefined(0);
+      ar.setLastlinedefined(0);
+      ar.setWhat("unknown function");
+	}
   }
 
   /** Equivalent to macro isLua _and_ f_isLua from lstate.h. */
@@ -2316,9 +2344,36 @@ protect:
     stacksetsize(oldtop+1);
   }
 
-  void dThrow(int status)
+  public String dStackDumpString()
   {
-    throw new LuaError(status);
+// simple lua stack dump so we have a chance to debug...	
+	int i=0;
+	String s="\n "+toString(value(-1));
+
+/*
+ * 	for(i=-1;i>-4;i--)
+	{
+		s=s+"\n"+toString(value(i));
+	}
+	s=s+"\n **["+civ.size()+"]** ";
+*/
+
+	String s2;
+	for(i=0;i<civ.size();i++)
+	{
+		s2=where(i);
+		s=s+"\n "+s2;
+	}
+	
+	return s;
+  }
+  public void dThrow(int status)
+  {
+    throw new LuaError(status,dStackDumpString());
+  }
+ public void dThrow(int status , String s)
+  {
+    throw new LuaError(status,s+dStackDumpString());
   }
 
 
@@ -3809,7 +3864,8 @@ reentry:
       }
       catch (RuntimeException e)
       {
-        yield(0);
+// HAX: this yield seems bad?
+//        yield(0);
         throw e;
       }
       if (n < 0)        // yielding?
@@ -4277,7 +4333,7 @@ reentry:
   /** Lua's is False predicate. */
   private boolean isFalse(Object o)
   {
-    return o == NIL || o == Boolean.FALSE;
+    return o == NIL || ( (o instanceof Boolean) && (((Boolean)o).booleanValue()==false ) );
   }
 
   /** @deprecated DO NOT CALL. */

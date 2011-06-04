@@ -101,6 +101,7 @@ public final class StringLib extends LuaJavaCallback
       case FORMAT:
         return format(L);
       case GMATCH:
+      case GFIND:
         return gmatch(L);
       case GSUB:
         return gsub(L);
@@ -1423,6 +1424,7 @@ flag:
     }
 
     String s = Double.toString(d);
+    if(s=="Infinity") { return "Infinity"; } // this is bad...
     StringBuffer t = new StringBuffer(s);
     int e;      // Exponent value
     if (d == 0)
@@ -1470,6 +1472,7 @@ flag:
   private String formatFloatRawF(double d)
   {
     String s = Double.toString(d);
+    if(s=="Infinity") { return "Infinity"; } // this is bad...
     StringBuffer t = new StringBuffer(s);
 
     int di = s.indexOf('.');
@@ -1584,7 +1587,8 @@ flag:
       // (10**(precision-1)).
       StringBuffer a = new StringBuffer(s);
       a.delete(fsd+required, Integer.MAX_VALUE);
-      if (s.indexOf('.') < a.length())
+      int dd=s.indexOf('.');
+      if( (dd>=0) && (dd < a.length()) )
       {
         // Trim trailing zeroes
         int i = a.length() - 1;
@@ -1623,22 +1627,25 @@ flag:
 
     String s = t.toString();
     int di = s.indexOf('.');
-    int l = t.length();
-    if (0 == precision)
+    if(di>=0)
     {
-      t.delete(di, Integer.MAX_VALUE);
-    }
-    else if (l > di+precision)
-    {
-      t.delete(di+precision+1, Integer.MAX_VALUE);
-    }
-    else
-    {
-      for(; l <= di+precision; ++l)
-      {
-        t.append('0');
-      }
-    }
+		int l = t.length();
+		if (0 == precision)
+		{
+		  t.delete(di, Integer.MAX_VALUE);
+		}
+		else if (l > di+precision)
+		{
+		  t.delete(di+precision+1, Integer.MAX_VALUE);
+		}
+		else
+		{
+		  for(; l <= di+precision; ++l)
+		  {
+			t.append('0');
+		  }
+		}
+	}
   }
 
   private void zeroPad(StringBuffer t)

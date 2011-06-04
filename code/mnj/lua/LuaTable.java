@@ -74,18 +74,21 @@ public final class LuaTable extends java.util.Hashtable
    */
   LuaTable(int narray, int nhash)
   {
+
     // :todo: super(nhash) isn't clearly correct as adding nhash hash
     // table entries will causes a rehash with the usual implementation
     // (which rehashes when ratio of entries to capacity exceeds the
     // load factor of 0.75).  Perhaps ideally we would size the hash
     // tables such that adding nhash entries will not cause a rehash.
     super(nhash);
+/* // disable array part
     array = new Object[narray];
     for (int i=0; i<narray; ++i)
     {
       array[i] = Lua.NIL;
     }
     sizeArray = narray;
+*/
   }
 
   /**
@@ -220,6 +223,8 @@ public final class LuaTable extends java.util.Hashtable
    */
   private void resize(int nasize)
   {
+return; // disable array part
+/*
     if (nasize == sizeArray)
     {
       return;
@@ -264,12 +269,14 @@ public final class LuaTable extends java.util.Hashtable
     }
     array = newarray;
     sizeArray = array.length;
+*/
   }
 
   protected void rehash()
   {
     boolean oldinrehash = inrehash;
     inrehash = true;
+/* disable array part
     if (!oldinrehash)
     {
       int[] nasize = new int[1];
@@ -281,6 +288,7 @@ public final class LuaTable extends java.util.Hashtable
 
       resize(nasize[0]);
     }
+*/
     super.rehash();
     inrehash = oldinrehash;
   }
@@ -375,7 +383,7 @@ public final class LuaTable extends java.util.Hashtable
    * behaviour for <code>t[nil]</code>, this code assumes that Lua.NIL
    * is non-<code>null</code>.
    */
-  Object getlua(Object key)
+  public Object getlua(Object key)
   {
     if (key instanceof Double)
     {
@@ -401,7 +409,7 @@ public final class LuaTable extends java.util.Hashtable
    * Like {@link #getlua(Object)} but the result is written into
    * the <var>value</var> {@link Slot}.
    */
-  void getlua(Slot key, Slot value)
+  public void getlua(Slot key, Slot value)
   {
     if (key.r == Lua.NUMBER)
     {
@@ -425,7 +433,7 @@ public final class LuaTable extends java.util.Hashtable
   }
 
   /** Like get for numeric (integer) keys. */
-  Object getnum(int k)
+  public Object getnum(int k)
   {
     if (k <= sizeArray && k >= 1)
     {
@@ -450,7 +458,7 @@ public final class LuaTable extends java.util.Hashtable
    * @param key key.
    * @param value value.
    */
-  void putlua(Lua L, Object key, Object value)
+  public void putlua(Lua L, Object key, Object value)
   {
     double d = 0.0;
     int i = Integer.MAX_VALUE;
@@ -496,7 +504,7 @@ public final class LuaTable extends java.util.Hashtable
     }
   }
 
-  void putlua(Lua L, Slot key, Object value)
+  public void putlua(Lua L, Slot key, Object value)
   {
     int i = Integer.MAX_VALUE;
 
@@ -535,7 +543,7 @@ public final class LuaTable extends java.util.Hashtable
   /**
    * Like put for numeric (integer) keys.
    */
-  void putnum(int k, Object v)
+  public void putnum(int k, Object v)
   {
     if (k <= sizeArray && k >= 1)
     {

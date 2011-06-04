@@ -25,6 +25,7 @@
 package mnj.lua;
 
 import java.io.InputStream;
+import java.io.FileReader;
 import java.io.IOException;
 
 /**
@@ -147,7 +148,7 @@ public final class PackageLib extends LuaJavaCallback
   private static final String DIRSEP = "/";
   private static final char PATHSEP = ';';
   private static final String PATH_MARK = "?";
-  private static final String PATH_DEFAULT = "?.lua;?/init.lua";
+  private static final String PATH_DEFAULT = "lua/?.lua;lua/?/init.lua;WEB-INF/lua/?.lua;WEB-INF/lua/?/init.lua";
 
   private static final Object SENTINEL = new Object();
 
@@ -157,6 +158,7 @@ public final class PackageLib extends LuaJavaCallback
    */
   private int loaderPreload(Lua L)
   {
+ 
     String name = L.checkString(1);
     Object preload = L.getField(me, "preload");
     if (!L.isTable(preload))
@@ -174,6 +176,7 @@ public final class PackageLib extends LuaJavaCallback
    */
   private int loaderLua(Lua L)
   {
+ 
     String name = L.checkString(1);
     String filename = findfile(L, name, "path");
     if (filename == null)
@@ -212,6 +215,7 @@ public final class PackageLib extends LuaJavaCallback
   /** Implements require. */
   private int require(Lua L)
   {
+ 
     String name = L.checkString(1);
     L.setTop(1);
     // PUC-Rio's use of lua_getfield(L, LUA_REGISTRYINDEX, "_LOADED");
@@ -329,7 +333,19 @@ public final class PackageLib extends LuaJavaCallback
 
   private static boolean readable(String filename)
   {
+    try
+    {
+		FileReader f = new FileReader(filename);
+	}
+    catch (IOException e_)
+    {
+		return false;
+    }
+    return true;
+	
+/*
     InputStream f = PackageLib.class.getResourceAsStream(filename);
+	
     if (f == null)
       return false;
     try
@@ -340,6 +356,7 @@ public final class PackageLib extends LuaJavaCallback
     {
     }
     return true;
+*/
   }
 
   private static String pushnexttemplate(Lua L, String path)

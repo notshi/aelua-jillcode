@@ -39,5 +39,5 @@ package mnj.lua;
  */
 public abstract class LuaJavaCallback
 {
-  abstract int luaFunction(Lua L);
+  abstract public int luaFunction(Lua L);
 }

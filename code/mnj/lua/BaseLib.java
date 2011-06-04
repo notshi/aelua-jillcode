@@ -46,7 +46,7 @@ public final class BaseLib extends LuaJavaCallback
   private static final int COLLECTGARBAGE = 2;
   private static final int DOFILE = 3;
   private static final int ERROR = 4;
-  // private static final int GCINFO = 5;
+  private static final int GCINFO = 5;
   private static final int GETFENV = 6;
   private static final int GETMETATABLE = 7;
   private static final int LOADFILE = 8;
@@ -137,6 +137,8 @@ public final class BaseLib extends LuaJavaCallback
         return dofile(L);
       case ERROR:
         return error(L);
+      case GCINFO:
+        return gcinfo(L);
       case GETFENV:
         return getfenv(L);
       case GETMETATABLE:
@@ -217,6 +219,7 @@ public final class BaseLib extends LuaJavaCallback
     r(L, "collectgarbage", COLLECTGARBAGE);
     r(L, "dofile", DOFILE);
     r(L, "error", ERROR);
+    r(L, "gcinfo", GCINFO);
     r(L, "getfenv", GETFENV);
     r(L, "getmetatable", GETMETATABLE);
     r(L, "ipairs", IPAIRS);
@@ -335,6 +338,15 @@ public final class BaseLib extends LuaJavaCallback
     L.error(L.value(1));
     // NOTREACHED
     return 0;
+  }
+
+  /** Implements gcinfo. */
+  private static int gcinfo(Lua L)
+  {
+    Runtime rt = Runtime.getRuntime();
+    L.push( new Double( (rt.totalMemory()-rt.freeMemory())/1024 ) );
+    L.push( new Double( rt.maxMemory()/1024 ) );
+    return 2;
   }
 
   /** Helper for getfenv and setfenv. */
@@ -736,8 +748,17 @@ public final class BaseLib extends LuaJavaCallback
   /** Implements type. */
   private static int type(Lua L)
   {
-    L.checkAny(1);
-    L.push(L.typeNameOfIndex(1));
+// since this java has a special nil, this can be bad if we didint pass in any object?
+// seems to break some lua code i have so this fixes it
+//    L.checkAny(1);
+    if (L.type(1) == L.TNONE)
+    {
+		L.push("nil");
+	}
+	else
+	{
+		L.push(L.typeNameOfIndex(1));
+	}
     return 1;
   }
 

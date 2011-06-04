@@ -137,7 +137,7 @@ public final class OSLib extends LuaJavaCallback
     }
     else
     {
-      t = (long)L.checkNumber(2);
+      t = (long)(L.checkNumber(2)*1000); //FIX ms to s
     }
 
     String s = L.optString(1, "%c");
@@ -153,14 +153,16 @@ public final class OSLib extends LuaJavaCallback
 
     if (s.equals("*t"))
     {
+		int hour_add=c.get(Calendar.AM_PM)==Calendar.PM ? 12 : 0 ; // fix the hour
+
       L.push(L.createTable(0, 8));      // 8 = number of fields
       setfield(L, "sec", c.get(Calendar.SECOND));
       setfield(L, "min", c.get(Calendar.MINUTE));
-      setfield(L, "hour", c.get(Calendar.HOUR));
+      setfield(L, "hour", c.get(Calendar.HOUR)+hour_add);
       setfield(L, "day", c.get(Calendar.DAY_OF_MONTH));
-      setfield(L, "month", canonicalmonth(c.get(Calendar.MONTH)));
+      setfield(L, "month", canonicalmonth(c.get(Calendar.MONTH))+1);
       setfield(L, "year", c.get(Calendar.YEAR));
-      setfield(L, "wday", canonicalweekday(c.get(Calendar.DAY_OF_WEEK)));
+      setfield(L, "wday", canonicalweekday(c.get(Calendar.DAY_OF_WEEK))+1);
       // yday is not supported because CLDC 1.1 does not provide it.
       // setfield(L, "yday", c.get("???"));
       if (tz.useDaylightTime())
@@ -215,7 +217,8 @@ public final class OSLib extends LuaJavaCallback
             b.append(format(c.get(Calendar.DAY_OF_MONTH), 2));
             break;
           case 'H':
-            b.append(format(c.get(Calendar.HOUR), 2));
+			int hour_add=c.get(Calendar.AM_PM)==Calendar.PM ? 12 : 0 ; // fix the hour
+            b.append(format(c.get(Calendar.HOUR)+hour_add, 2));
             break;
           case 'I':
             {
@@ -290,7 +293,7 @@ public final class OSLib extends LuaJavaCallback
   /** Implements difftime. */
   private static int difftime(Lua L)
   {
-    L.pushNumber((L.checkNumber(1) - L.optNumber(2, 0))/1000);
+    L.pushNumber((L.checkNumber(1) - L.optNumber(2, 0))); //FIX ms to s
     return 1;
   }
 
@@ -335,7 +338,7 @@ public final class OSLib extends LuaJavaCallback
   {
     if (L.isNoneOrNil(1))       // called without args?
     {
-      L.pushNumber(System.currentTimeMillis());
+      L.pushNumber(System.currentTimeMillis()/1000.0); //FIX ms to s
       return 1;
     }
     L.checkType(1, Lua.TTABLE);
@@ -348,7 +351,7 @@ public final class OSLib extends LuaJavaCallback
     c.set(Calendar.MONTH, MONTH[getfield(L, "month", -1) - 1]);
     c.set(Calendar.YEAR, getfield(L, "year", -1));
     // ignore isdst field
-    L.pushNumber(c.getTime().getTime());
+    L.pushNumber(c.getTime().getTime()/1000.0); //FIX ms to s
     return 1;
   }
 
