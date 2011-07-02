@@ -184,8 +184,9 @@ public final class Lua
 
   /**
    * Spare Slot used for a temporary.
+   * static? that is totally uncool threads dude.
    */
-  private static final Slot SPARE_SLOT = new Slot();
+  private /*static*/ final Slot SPARE_SLOT = new Slot();
 
   /**
    * Registry key for loaded modules.
@@ -696,6 +697,7 @@ public final class Lua
    */
   public static boolean isNumber(Object o)
   {
+	Slot SPARE_SLOT=new Slot();
     SPARE_SLOT.setObject(o);
     return tonumber(SPARE_SLOT, NUMOP);
   }
