@@ -39,7 +39,7 @@ public final class LuaTable extends java.util.Hashtable
   private static final int MAXASIZE = 1 << MAXBITS;
 
   private LuaTable metatable;   // = null;
-  private static final Object[] ZERO = new Object[0];
+  private /*static*/ final Object[] ZERO = new Object[0];
   /**
    * Array used so that tables accessed like arrays are more efficient.
    * All elements stored at an integer index, <var>i</var>, in the
