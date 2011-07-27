@@ -112,7 +112,7 @@ public final class OSLib extends LuaJavaCallback
     L.setField(lib, name, f);
   }
 
-  private /*static final*/ long T0 = System.currentTimeMillis();
+  private static final long T0 = System.currentTimeMillis();
 
   /** Implements clock.  Java provides no way to get CPU time, so we
    * return the amount of wall clock time since this class was loaded.

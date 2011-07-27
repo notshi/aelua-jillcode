@@ -56,7 +56,7 @@ public final class StringLib extends LuaJavaCallback
 
   private static final int GMATCH_AUX= 16;
 
-  private /*static final*/ StringLib GMATCH_AUX_FUN = new StringLib(GMATCH_AUX);
+  private static final StringLib GMATCH_AUX_FUN = new StringLib(GMATCH_AUX);
 
   /**
    * Which library function this object represents.  This value should
