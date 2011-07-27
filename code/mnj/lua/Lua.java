@@ -697,9 +697,12 @@ public final class Lua
    */
   public static boolean isNumber(Object o)
   {
+	  
+double[] NUMOPs = new double[2]; // this static use was probably breaking everything
+
 	Slot SPARE_SLOT=new Slot();
     SPARE_SLOT.setObject(o);
-    return tonumber(SPARE_SLOT, NUMOP);
+    return tonumber(SPARE_SLOT, NUMOPs);
   }
 
   /**
