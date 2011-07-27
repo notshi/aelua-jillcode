@@ -40,11 +40,11 @@ package mnj.lua;
 final class Proto
 {
   /** Interned 0-element array. */
-  private static final int[] ZERO_INT_ARRAY = new int[0];
-  private static final LocVar[] ZERO_LOCVAR_ARRAY = new LocVar[0];
-  private static final Slot[] ZERO_CONSTANT_ARRAY = new Slot[0];
-  private static final Proto[] ZERO_PROTO_ARRAY = new Proto[0];
-  private static final String[] ZERO_STRING_ARRAY = new String[0];
+  private /*static final*/ int[] ZERO_INT_ARRAY = new int[0];
+  private /*static final*/ LocVar[] ZERO_LOCVAR_ARRAY = new LocVar[0];
+  private /*static final*/ Slot[] ZERO_CONSTANT_ARRAY = new Slot[0];
+  private /*static final*/ Proto[] ZERO_PROTO_ARRAY = new Proto[0];
+  private /*static final*/ String[] ZERO_STRING_ARRAY = new String[0];
 
   // Generally the fields are named following the PUC-Rio implementation
   // and so are unusually terse.

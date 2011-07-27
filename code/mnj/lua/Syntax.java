@@ -86,6 +86,7 @@ final class Syntax
     "<number>", "<name>", "<string>", "<eof>"
   };
 
+// this is probably an ok static yes?
   static Hashtable reserved = new Hashtable();
   static
   {

@@ -77,7 +77,7 @@ import java.util.Vector;
 public final class Lua
 {
   /** Version string. */
-  public static final String VERSION = "Lua 5.1 (Jill 1.0.1)";
+  public static final String VERSION = "Lua 5.1 (Jill 1.0.1.19)";
 
   /** Table of globals (global variables).  This actually shared across
    * all threads (with the same main thread), but kept in each Lua
@@ -3016,7 +3016,7 @@ protect:
    * Array of numeric operands.  Used when converting strings to numbers
    * by an arithmetic opcode (ADD, SUB, MUL, DIV, MOD, POW, UNM).
    */
-  private static final double[] NUMOP = new double[2];
+  private /*static final*/ double[] NUMOP = new double[2];
 
   /** The core VM execution engine. */
   private void vmExecute(int nexeccalls)
