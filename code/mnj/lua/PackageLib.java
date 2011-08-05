@@ -331,8 +331,9 @@ public final class PackageLib extends LuaJavaCallback
         L.toString(L.value(-1)));
   }
 
-  private static boolean readable(String filename)
+  private static boolean readable(Lua L,String filename)
   {
+	if(L.zip_find(filename)) { return true; } // check zip
     try
     {
 		FileReader f = new FileReader(filename);
@@ -387,7 +388,7 @@ public final class PackageLib extends LuaJavaCallback
       if (path == null)
         break;
       String filename = gsub(L.toString(L.value(-1)), PATH_MARK, name);
-      if (readable(filename))   // does file exist and is readable?
+      if (readable(L,filename))   // does file exist and is readable?
         return filename;        // return that file name
       L.pop(1); // remove path template
       L.pushString("\n\tno file '" + filename + "'");

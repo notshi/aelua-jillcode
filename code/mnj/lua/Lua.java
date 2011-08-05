@@ -34,6 +34,8 @@ import java.util.Enumeration;
 import java.util.Stack;
 import java.util.Vector;
 
+import java.util.zip.*;
+import java.io.ByteArrayInputStream;
 
 /**
  * <p>
@@ -1916,6 +1918,76 @@ protect:
     return type(narg) <= TNIL;
   }
 
+
+// register a zip file full of lua strings we may load from
+	byte[] lua_zip_data;	
+	public void zip_add_data(byte[] data)
+	{
+		lua_zip_data=data;
+	}
+	
+	public String zip_load(String filename)
+	{
+		byte[] data=zip_load_bytes(filename);
+		if(data==null) { return null; }
+		return new String(data);
+	}
+	public byte[] zip_load_bytes(String filename)
+	{
+		if(lua_zip_data!=null)
+		{
+			try
+			{
+				ByteArrayInputStream bs=new ByteArrayInputStream(lua_zip_data);
+				ZipInputStream zip=new ZipInputStream(bs);
+							
+				ZipEntry entry;
+				while((entry = zip.getNextEntry()) != null)
+				{
+					if( entry.getName().equals(filename) ) // found the file we want
+					{
+						byte data[] = new byte[(int)entry.getSize()];
+						int rem=(int)entry.getSize();
+						int off=0;
+						int d=0;
+						while(rem>0)
+						{
+							d=zip.read(data,off,rem);
+							off+=d;
+							rem-=d;
+						}
+						return data;
+					}
+				}
+			}
+			catch(Exception e) { return null; }
+		}
+		return null;
+	}
+	
+	public boolean zip_find(String filename)
+	{
+		if(lua_zip_data!=null)
+		{
+			try
+			{
+				ByteArrayInputStream bs=new ByteArrayInputStream(lua_zip_data);
+				ZipInputStream zip=new ZipInputStream(bs);
+							
+				ZipEntry entry;
+				while((entry = zip.getNextEntry()) != null)
+				{
+					if( entry.getName().equals(filename) ) // found the file we want
+					{
+						return true;
+					}
+				}
+			}
+			catch(Exception e) { return false; }
+		}
+		return false;
+	}
+
   /**
    * Loads a Lua chunk from a file.  The <var>filename</var> argument is
    * used in a call to {@link Class#getResourceAsStream} where
@@ -1926,12 +1998,17 @@ protect:
    * @param filename  location of file.
    * @return status code, as per {@link #load}.
    */
+
   public int loadFile(String filename)
   {
     if (filename == null)
     {
       throw new NullPointerException();
     }
+    
+    String datas=zip_load(filename);
+    if(datas!=null) { return loadString(datas,"@"+filename); }
+    
 /*
 	
     InputStream in = getClass().getResourceAsStream(filename);
