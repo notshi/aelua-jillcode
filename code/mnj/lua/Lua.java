@@ -1953,7 +1953,11 @@ protect:
       in.reset();
       status = load(in, "@" + filename);
 */
-      status = load(new FileReader(filename), "@" + filename);
+		FileReader reader=new FileReader(filename);
+		
+      status = load(reader, "@" + filename);
+      
+      reader.close(); // does this help?
     }
     catch (IOException e)
     {
